@@ -30,7 +30,8 @@ Image::Image(QQmlEngine *engine, const QString &filename) :
     engine->setObjectOwnership(this, QQmlEngine::JavaScriptOwnership);
     if (filename.startsWith(QStringLiteral("data:"))) {
         int comma = filename.indexOf(QChar(','));
-        QStringRef data = filename.midRef(comma+1);
+        // QStringRef data = filename.midRef(comma+1);
+        QString data = filename.mid(comma+1);
         QBuffer *buffer = new QBuffer(this);
         buffer->setData(QByteArray::fromBase64(data.toLatin1()));
         m_reader = new QImageReader(buffer);

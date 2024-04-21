@@ -5,6 +5,9 @@
 #include <QtCore/QFile>
 #include <QtCore/QFileInfo>
 #include <QtCore/QTextStream>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QStringConverter>
+#endif
 #include <QtNetwork/QNetworkCookie>
 
 #include "cookiejar.h"
@@ -58,12 +61,21 @@ void CookieJar::save() const
     }
 
     QTextStream out(&file);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    out.setEncoding( QStringConverter::Utf8  );
+#else
     out.setCodec("UTF-8");
+#endif
 
     QList<QNetworkCookie> cookies = allCookies();
     foreach (QNetworkCookie c, cookies) {
         if (m_persistSessions || !c.isSessionCookie())
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            out << c.toRawForm() << Qt::endl;
+#else
             out << c.toRawForm() << endl;
+#endif
     }
 
     file.close();
@@ -78,7 +90,11 @@ void CookieJar::load()
     }
 
     QTextStream in(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    in.setEncoding( QStringConverter::Utf8  );
+#else
     in.setCodec("UTF-8");
+#endif
 
     QList<QNetworkCookie> cookies;
     while (!in.atEnd()) {

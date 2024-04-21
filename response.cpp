@@ -1,8 +1,20 @@
 // Copyright 2016 Cutehacks AS. All rights reserved.
 // License can be found in the LICENSE file.
 
+
+#include <QtGlobal>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QRegularExpressionMatch>
+#include <QStringConverter>
+#include <QStringDecoder>
+#else
 #include <QtCore/QRegExp>
 #include <QtCore/QTextCodec>
+#endif
+
+
+
 #include <QtNetwork/QNetworkReply>
 #include <QtQml/QQmlEngine>
 #include <QJsonObject>
@@ -19,16 +31,30 @@ ResponsePrototype::ResponsePrototype(QQmlEngine *engine, QNetworkReply *reply, i
 {
     QString type = m_reply->header(QNetworkRequest::ContentTypeHeader).toString();
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QRegularExpression charsetRegexp(".*charset=(.*)[\\s]*", QRegularExpression::CaseInsensitiveOption );
+    QRegularExpressionMatch matchResult = charsetRegexp.match(type) ;
+    if ( matchResult.hasMatch() ) {
+        m_charset =  matchResult.captured(1);
+    }
+#else
     QRegExp charsetRegexp(".*charset=(.*)[\\s]*", Qt::CaseInsensitive, QRegExp::RegExp2);
     if (charsetRegexp.exactMatch(type)) {
         m_charset = charsetRegexp.capturedTexts().at(1);
     }
+#endif
+
 
     if (m_reply->isReadable()) {
         QByteArray data = m_reply->readAll();
 
-        QTextCodec *text = QTextCodec::codecForName(m_charset.toLatin1());
-        m_text = text ? text->makeDecoder()->toUnicode(data) : QString::fromUtf8(data);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QStringDecoder decoder = QStringDecoder ( qUtf8Printable(m_charset) );
+        m_text = decoder.isValid() ?  decoder.decode(data) : QString::fromUtf8(data);
+#else
+    QTextCodec *text = QTextCodec::codecForName(m_charset.toLatin1());
+    m_text = text ? text->makeDecoder()->toUnicode(data) : QString::fromUtf8(data);
+#endif
 
         switch (responseType)
         {

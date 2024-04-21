@@ -104,8 +104,10 @@ QJSValue SecureConnectEvent::getPeerCertificate()
 QString SecureConnectEvent::getProtocol()
 {
     switch (m_ssl.sessionProtocol()) {
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     case QSsl::SslV3:
-        return QStringLiteral("SSLv3");
+         return QStringLiteral("SSLv3");
     case QSsl::TlsV1_0:
         return QStringLiteral("TLSv1");
     case QSsl::TlsV1_1:
@@ -114,6 +116,21 @@ QString SecureConnectEvent::getProtocol()
         return QStringLiteral("TLSv1.2");
     default:
         return QStringLiteral("unknown");
+#else
+    case QSsl::TlsV1_0:
+        return QStringLiteral("TLSv1");
+    case QSsl::TlsV1_1:
+        return QStringLiteral("TLSv1.1");
+    case QSsl::TlsV1_2:
+        return QStringLiteral("TLSv1.2");
+    case QSsl::TlsV1_3:
+        return QStringLiteral("TLSv1.3");
+    case QSsl::TlsV1_3OrLater:
+        return QStringLiteral("TLSv1.3 or later");
+    default:
+        return QStringLiteral("unknown");
+#endif
+
     }
 }
 
