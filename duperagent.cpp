@@ -26,6 +26,9 @@ Request::Request(QQmlEngine *engine, QObject *parent) :
     contentTypes.insert("xml", "application/xml");
     contentTypes.insert("form", "application/x-www-form-urlencoded");
     contentTypes.insert("form-data", "application/x-www-form-urlencoded");
+    contentTypes.insert("image", "image");
+    contentTypes.insert("pdf"  , "pdf");
+    contentTypes.insert("octect-stream", "octect");
 }
 
 void Request::config(const QJSValue &options)

@@ -9,6 +9,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QHttpMultiPart>
 #include <QtQml/QQmlEngine>
+#include <QDebug>
 
 #ifndef QT_NO_SSL
 #include <QtNetwork/QSslError>
@@ -466,6 +467,17 @@ void RequestPrototype::setData(const QJSValue &data)
    m_data = data;
 }
 
+QJSValue &RequestPrototype::contentEncoding()
+{
+    return m_contentEncoding ;
+}
+
+void RequestPrototype::setContentEncoding(const QJSValue &encoding)
+{
+   m_contentEncoding  = encoding;
+}
+
+
 QJSValue &RequestPrototype::headers()
 {
     return m_headers;
@@ -479,14 +491,23 @@ void RequestPrototype::setHeaders(const QJSValue &headers)
 QByteArray RequestPrototype::serializeData()
 {
     QByteArray type = m_request->header(
-                QNetworkRequest::ContentTypeHeader).toByteArray();
-
+                                   QNetworkRequest::ContentTypeHeader).toByteArray();
     if (type.contains(contentTypes["json"])) {
         JsonCodec json(m_engine);
         return json.stringify(m_data);
     } else if (type.contains(contentTypes["form"])) {
         FormUrlEncodedCodec urlencoded(m_engine);
         return urlencoded.stringify(m_data);
+    } else if (
+        type.contains(contentTypes["image"])
+        || type.contains(contentTypes["pdf"])
+        || type.contains(contentTypes["octect-stream"])
+
+        ) {
+        QString contentEncoding = m_contentEncoding.toString();
+        if ( ! contentEncoding.isEmpty() && contentEncoding == "base64" ) {
+            return QByteArray::fromBase64( m_data.toString().toUtf8() , QByteArray::Base64Encoding);
+        }
     }
     return m_data.toString().toUtf8();
 }

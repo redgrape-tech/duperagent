@@ -40,6 +40,7 @@ class RequestPrototype : public QObject {
     Q_PROPERTY(QString method READ method WRITE setMethod)
     Q_PROPERTY(QString url READ url WRITE setUrl)
     Q_PROPERTY(QJSValue data READ data WRITE setData)
+    Q_PROPERTY(QJSValue contentEncoding READ contentEncoding WRITE setContentEncoding)
     Q_PROPERTY(QJSValue headers READ headers WRITE setHeaders)
 
 public:
@@ -88,6 +89,7 @@ public:
     Q_INVOKABLE QJSValue then(QJSValue = QJSValue(), QJSValue = QJSValue());
     Q_INVOKABLE void endCallback(QJSValue, QJSValue);
     Q_INVOKABLE void executor(QJSValue, QJSValue);
+    Q_INVOKABLE void setContentEncoding(const QJSValue&);
 
     inline QJSValue self() const { return m_self; }
 
@@ -99,6 +101,8 @@ public:
 
     QJSValue &data();
     void setData(const QJSValue&);
+
+    QJSValue &contentEncoding() ;
 
     QJSValue &headers();
     void setHeaders(const QJSValue&);
@@ -146,6 +150,7 @@ private:
     QJSValue m_data;
     QJSValue m_headers;
     QByteArray m_rawData;
+    QJSValue m_contentEncoding;
     QJSValue m_error;
     QHash<QString, QJSValueList> m_listeners;
     QScopedPointer<Promise> m_promise;
