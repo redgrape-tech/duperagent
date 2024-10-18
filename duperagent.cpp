@@ -14,7 +14,9 @@
 
 namespace com { namespace cutehacks { namespace duperagent {
 
-static const char* DUPERAGENT_URI = "com.cutehacks.duperagent";
+// static const char* DUPERAGENT_URI = "com.cutehacks.duperagent";
+
+#define DUPERAGENT_URI "duperagent"
 
 extern ContentTypeMap contentTypes;
 

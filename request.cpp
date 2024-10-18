@@ -141,9 +141,11 @@ QJSValue RequestPrototype::type(const QJSValue &type)
 {
     QString t = type.toString();
     if (contentTypes.contains(t)) {
+        qDebug() << "type has matched one of the items in duperagent map table : " <<  contentTypes.value(t);
         m_request->setHeader(QNetworkRequest::ContentTypeHeader,
                              contentTypes.value(t));
     } else {
+        qDebug() << "type has NOT matched any of the items in duperagent map table" ;
         m_request->setHeader(QNetworkRequest::ContentTypeHeader, t);
     }
     return self();
@@ -498,18 +500,14 @@ QByteArray RequestPrototype::serializeData()
     } else if (type.contains(contentTypes["form"])) {
         FormUrlEncodedCodec urlencoded(m_engine);
         return urlencoded.stringify(m_data);
-    } else if (
-        type.contains(contentTypes["image"])
-        || type.contains(contentTypes["pdf"])
-        || type.contains(contentTypes["octect-stream"])
-
-        ) {
+    } else {
         QString contentEncoding = m_contentEncoding.toString();
+
         if ( ! contentEncoding.isEmpty() && contentEncoding == "base64" ) {
             return QByteArray::fromBase64( m_data.toString().toUtf8() , QByteArray::Base64Encoding);
         }
+        return m_data.toString().toUtf8();
     }
-    return m_data.toString().toUtf8();
 }
 
 void RequestPrototype::dispatchRequest()
